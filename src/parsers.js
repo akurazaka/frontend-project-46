@@ -1,4 +1,4 @@
-import fs from 'fs';
+import * as fs from 'node:fs';
 import path from 'path';
 import yaml from 'js-yaml';
 
