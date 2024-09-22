@@ -8,10 +8,10 @@ program
   .version('1.0.0')
   .arguments('<filepath1> <filepath2>')
   .option('-f, --format [type]', 'output format', 'stylish')
-  .action((filepath1, filepath2, options) => {
+  .action((filepath1, filepath2) => {
     const data1 = parseFile(filepath1);
     const data2 = parseFile(filepath2);
-    const res = compareFiles(data1, data2, options.format);
-    console.log(res);
+    const result = compareFiles(data1, data2);
+    console.log(result);
   })
   .parse();
