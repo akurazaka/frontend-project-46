@@ -1,10 +1,13 @@
 import parseFile from '../src/parsers.js';
+import fs from 'fs';
 import path from 'path';
 
-describe('parseFile', () => {
-  test('should parse JSON file correctly', () => {
+describe('parsers', () => {
+  test('should parse JSON correctly', () => {
     const filePath = path.join(__dirname, '../__fixtures__/file1.json');
-    const result = parseFile(filePath);
+    const data = fs.readFileSync(filePath, 'utf8');
+    const result = parseFile('json', data);
+    
     const expected = {
       common: {
         setting1: 'Value 1',
@@ -25,12 +28,15 @@ describe('parseFile', () => {
         deep: { id: 45 },
       },
     };
+    
     expect(result).toEqual(expected);
   });
 
-  test('should parse YAML file correctly', () => {
+  test('should parse YAML correctly', () => {
     const filePath = path.join(__dirname, '../__fixtures__/file1.yml');
-    const result = parseFile(filePath);
+    const data = fs.readFileSync(filePath, 'utf8');
+    const result = parseFile('yml', data);
+    
     const expected = {
       common: {
         setting1: 'Value 1',
@@ -51,6 +57,12 @@ describe('parseFile', () => {
         deep: { id: 45 },
       },
     };
+    
     expect(result).toEqual(expected);
+  });
+
+  test('should throw error for unsupported format', () => {
+    const data = '{"key": "value"}';
+    expect(() => parseFile('txt', data)).toThrowError(/Cannot find parser for "txt"/);
   });
 });
