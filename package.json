@@ -14,12 +14,25 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "commander": "^12.1.0"
+    "commander": "^12.1.0",
+    "js-yaml": "^4.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.11.0",
     "eslint": "^9.11.0",
     "globals": "^15.9.0",
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "babel-jest": "^29.7.0",
+    "@babel/preset-env": "^7.20.0"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "useESM": true
+      }
+    }
   }
 }

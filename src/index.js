@@ -1,31 +1,14 @@
-import path from 'path';
-import { readFileSync } from 'fs';
-import _ from 'lodash';
+import parseFile from './parsers.js';
+import genDiff from './diff.js';
+import stylish from './formatters/stylish.js';
 
-export const parseFile = (filepath) => {
-  const absolutePath = path.resolve(process.cwd(), filepath);
-  const fileData = readFileSync(absolutePath, 'utf-8');
-  return JSON.parse(fileData);
+const run = (filePath1, filePath2) => {
+  const obj1 = parseFile(filePath1);
+  const obj2 = parseFile(filePath2);
+  const diff = genDiff(obj1, obj2);
+  return stylish(diff);
 };
 
-const compareFiles = (data1, data2) => {
-    const keys = _.sortBy(_.union(Object.keys(data1), Object.keys(data2)));
-  
-    const result = keys.map((key) => {
-      if (_.has(data1, key) && !_.has(data2, key)) {
-        return `  - ${key}: ${data1[key]}`;
-      }
-      if (!_.has(data1, key) && _.has(data2, key)) {
-        return `  + ${key}: ${data2[key]}`;
-      }
-      if (data1[key] !== data2[key]) {
-        return `  - ${key}: ${data1[key]}\n  + ${key}: ${data2[key]}`;
-      }
-      return `    ${key}: ${data1[key]}`;
-    });
-    return `{\n${result.join('\n')}\n}`;
-  };
-  
-export default compareFiles;
-
-
+const file1 = process.argv[2];
+const file2 = process.argv[3];
+console.log(run(file1, file2));
