@@ -1,21 +1,22 @@
-import yaml from 'js-yaml';
 import fs from 'fs';
 import path from 'path';
+import yaml from 'js-yaml';
+
+const parse = {
+  json: JSON.parse,
+  yml: yaml.load,
+  yaml: yaml.load,
+};
 
 const parseFile = (filePath) => {
-  const extname = path.extname(filePath);
-
+  const extname = path.extname(filePath).slice(1); // Получаем расширение без точки
   const data = fs.readFileSync(filePath, 'utf8');
-
-  if (extname === '.json') {
-    return JSON.parse(data);
+  
+  if (!parse[extname]) {
+    throw new Error(`Unsupported file type: ${extname}`);
   }
 
-  if (extname === '.yml' || extname === '.yaml') {
-    return yaml.load(data);
-  }
-
-  throw new Error(`Unsupported file type: ${extname}`);
+  return parse[extname](data);
 };
 
 export default parseFile;
