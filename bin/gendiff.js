@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { program } from 'commander';
-// import compareFiles from '../src/index.js';
+import compareFiles, { parseFile } from '../src/index.js';
 
 program
   .name('gendiff')
@@ -9,7 +9,9 @@ program
   .arguments('<filepath1> <filepath2>')
   .option('-f, --format [type]', 'output format', 'stylish')
   .action((filepath1, filepath2, options) => {
-    const res = compareFiles(filepath1, filepath2, options.format);
+    const data1 = parseFile(filepath1);
+    const data2 = parseFile(filepath2);
+    const res = compareFiles(data1, data2, options.format);
     console.log(res);
   })
   .parse();
