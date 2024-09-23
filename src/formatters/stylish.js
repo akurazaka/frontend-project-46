@@ -37,11 +37,10 @@ const renderTree = (tree) => {
         case 'changed':
           return `${formatLine('- ', node.key, formatData(node.value.old, depth + 1), indent)}\n${formatLine('+ ', node.key, formatData(node.value.new, depth + 1), indent)}`;
         case 'node':
+        case 'nested': 
           return formatLine('  ', node.key, traverse(node.children, depth + 1), indent);
         case 'unchanged':
           return formatLine('  ', node.key, formatData(node.value, depth + 1), indent);
-        default:
-          throw new Error(`Unexpected node type: ${node.type}`);
       }
     });
 
