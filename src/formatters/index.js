@@ -1,17 +1,15 @@
 import stylish from './stylish.js';
 import plain from './plain.js';
-import jsonFormatter from './json.js';
 
-const getFormatter = (formatName) => {
-  switch (formatName) {
-    case 'plain':
-      return plain;
-    case 'json':
-      return jsonFormatter;
-    case 'stylish':
-    default:
-      return stylish;
-  }
+const formats = {
+  stylish,
+  plain,
+  json: (data) => JSON.stringify(data, null, 2),
 };
 
-export default getFormatter;
+const formatOutput = (data, format) => {
+  const formatter = formats[format] || formats.stylish;
+  return formatter(data);
+};
+
+export default formatOutput;
