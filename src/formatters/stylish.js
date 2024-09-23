@@ -1,6 +1,9 @@
 import _ from 'lodash';
 
-const getIndent = (depth) => ' '.repeat(depth * 4 - 2);
+const space = ' ';
+const spaceCount = 4;
+const getIndentSize = (depth) => depth * spaceCount;
+const getIndent = (depth) => space.repeat(getIndentSize(depth) - 2);
 
 const stringify = (value, depth) => {
   if (typeof value === 'object' && value !== null) {
