@@ -27,7 +27,7 @@ const renderTree = (tree) => {
   const traverse = (nodes, depth) => {
     const indent = buildIndent(depth);
     const bracketIndent = buildBracketIndent(depth);
-
+  
     const lines = nodes.map((node) => {
       switch (node.type) {
         case 'added':
@@ -35,9 +35,11 @@ const renderTree = (tree) => {
         case 'deleted':
           return formatLine('- ', node.key, formatData(node.value, depth + 1), indent);
         case 'changed':
-          return `${formatLine('- ', node.key, formatData(node.value.old, depth + 1), indent)}\n${formatLine('+ ', node.key, formatData(node.value.new, depth + 1), indent)}`;
+          const oldValue = node.value?.old ?? 'undefined';
+          const newValue = node.value?.new ?? 'undefined';
+          return `${formatLine('- ', node.key, formatData(oldValue, depth + 1), indent)}\n${formatLine('+ ', node.key, formatData(newValue, depth + 1), indent)}`;
         case 'node':
-        case 'nested': 
+        case 'nested':
           return formatLine('  ', node.key, traverse(node.children, depth + 1), indent);
         case 'unchanged':
           return formatLine('  ', node.key, formatData(node.value, depth + 1), indent);
