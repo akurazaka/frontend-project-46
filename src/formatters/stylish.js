@@ -1,31 +1,50 @@
+import _ from 'lodash';
+
+const space = ' ';
 const SPACES_PER_INDENT = 4;
 
-const createIndent = (depth, extraSpaces = 0) => ' '.repeat(depth * SPACES_PER_INDENT - extraSpaces);
+const getIndentSize = (depth) => depth * SPACES_PER_INDENT;
+const getIndent = (depth) => space.repeat(getIndentSize(depth) - 2);
+const getIndentBracket = (depth) => space.repeat(getIndentSize(depth) - SPACES_PER_INDENT);
 
-const formatLine = (sign, key, value, indent) => `${indent}${sign} ${key}: ${value}`;
+const createString = (type, key, value, indent) => `${indent}${type}${key}: ${value}`;
 
-const stylish = (nodes, depth = 1) => {
-  const lines = nodes.map((node) => {
-    const indent = createIndent(depth);
+const stringify = (value, depth) => {
+  if (!_.isObject(value)) {
+    return String(value);
+  }
+
+  const indent = getIndent(depth + 1);
+  const indentBracket = getIndentBracket(depth);
+  const lines = Object.entries(value).map(
+    ([key, val]) => createString('  ', key, stringify(val, depth + 1), indent)
+  );
+
+  return ['{', ...lines, `${indentBracket}}`].join('\n');
+};
+
+const stylish = (diff, depth = 1) => {
+  const indent = getIndent(depth);
+  const indentBracket = getIndentBracket(depth);
+
+  const lines = diff.map((node) => {
     switch (node.type) {
       case 'added':
-        return formatLine('+', node.key, node.value, indent);
+        return createString('+ ', node.key, stringify(node.value, depth), indent);
       case 'removed':
-        return formatLine('-', node.key, node.value, indent);
-      case 'unchanged':
-        return formatLine(' ', node.key, node.value, indent);
+        return createString('- ', node.key, stringify(node.value, depth), indent);
       case 'changed':
-        return [
-          formatLine('-', node.key, node.oldValue, indent),
-          formatLine('+', node.key, node.newValue, indent),
-        ].join('\n');
+        return `${createString('- ', node.key, stringify(node.value.old, depth), indent)}\n${createString('+ ', node.key, stringify(node.value.new, depth), indent)}`;
       case 'nested':
-        return `${indent}  ${node.key}: {\n${stylish(node.children, depth + 1)}\n${createIndent(depth, SPACES_PER_INDENT)}}`;
+        return createString('  ', node.key, stylish(node.children, depth + 1), indent);
+      case 'unchanged':
+        return createString('  ', node.key, stringify(node.value, depth), indent);
       default:
         throw new Error(`Unknown node type: ${node.type}`);
     }
   });
-  return ['{', ...lines, `${createIndent(depth - 1)}}`].join('\n');
+
+  return ['{', ...lines, `${indentBracket}}`].join('\n');
 };
 
 export default stylish;
