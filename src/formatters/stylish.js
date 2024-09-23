@@ -1,18 +1,18 @@
 const makeString = (obj, depth) => {
   const iter = (currentObj, currentDepth) => {
-    const spacesCount = 1;
+    const spacesCount = 4; // Убедитесь, что это значение совпадает с stylish
     const replacer = ' ';
     const indentSize = currentDepth * spacesCount;
-    const bracketIndent = replacer.repeat(indentSize - 4);
+    const bracketIndent = replacer.repeat(indentSize - spacesCount);
     const currentIndent = replacer.repeat(indentSize);
     if (typeof currentObj === 'object' && currentObj !== null) {
       const line = Object.entries(currentObj)
-        .map(([key, value]) => `\n${currentIndent}${key}: ${iter(value, currentDepth + 4)}`).join('');
+        .map(([key, value]) => `\n${currentIndent}${key}: ${iter(value, currentDepth + 1)}`).join('');
       return `{${line}\n${bracketIndent}}`;
     }
     return currentObj;
   }
-  const result = iter(obj, depth + 4);
+  const result = iter(obj, depth);
   return result;
 };
 
@@ -21,7 +21,7 @@ const stylish = (objects) => {
     const spacesCount = 4;
     const replacer = ' ';
     const indentSize = depth * spacesCount;
-    const cutIndentSize = depth * spacesCount - 2;
+    const cutIndentSize = indentSize - 2;
     const currentIndent = replacer.repeat(indentSize);
     const cutCurrentIndent = replacer.repeat(cutIndentSize);
 
@@ -37,7 +37,7 @@ const stylish = (objects) => {
       }
     }
     const nextObjects = currentValue.children.map((child) => iter(child, depth + 1)).join('');
-    return [`${currentIndent}${currentValue.name}: {\n${nextObjects}`, `${currentIndent}}\n`].join('');
+    return `${currentIndent}${currentValue.name}: {\n${nextObjects}${currentIndent}}\n`;
   };
   const result = objects.map((object) => iter(object, 1)).join('');
   return `{\n${result}}`;
