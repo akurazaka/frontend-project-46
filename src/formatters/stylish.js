@@ -1,56 +1,66 @@
 import _ from 'lodash';
 
-const statusMarkers = {
-  matched: ' ',
-  expected: '-',
-  received: '+',
-};
-
-const getStatusMarker = (status) => {
-  if (!(_.has(statusMarkers, status))) {
-    throw new Error(`Unknown status "${status}"`);
+const formatKeyName = (key, changeType, element) => {
+  if ((changeType === 'added') || ((changeType === 'changed') && (Object.hasOwn(element, 'oldValue')))) {
+    return `  + ${key}`;
+  } 
+  if (changeType === 'deleted') {
+    return `  - ${key}`;
   }
-  return statusMarkers[status];
+  return `    ${key}`;
 };
 
-const createIndent = (level, spaceCount = 4, offset = 2) => ' '.repeat((level * spaceCount) - offset);
-const convertToString = (element, level) => {
-  if (!(_.isPlainObject(element))) {
-    return `${element}`;
-  }
-  const indentLines = createIndent(level);
-  const entries = Object
-    .entries(element)
-    .map(([property, value]) => `${indentLines}${getStatusMarker('matched')} ${property}: ${convertToString(value, level + 1)}`);
+const transformDiffArrayToObject = (diffArray) => {
+  return diffArray.reduce((accumulator, element) => {
+    // Добавляем проверки для имени ключа (element.name)
+    const safeKey = element.name !== undefined ? element.name : 'undefined';
+    const formattedKey = formatKeyName(safeKey, element.diff, element);
+    const updatedAccumulator = accumulator;
 
-  const indentBrackets = createIndent(level, 4, 4);
-  return `{\n${entries.join('\n')}\n${indentBrackets}}`;
+    if (Object.hasOwn(element, 'oldValue')) {
+      const oldKey = `  - ${safeKey}`;
+      if (Array.isArray(element.value)) {
+        return {
+          ...updatedAccumulator, 
+          [oldKey]: element.oldValue, 
+          [formattedKey]: transformDiffArrayToObject(element.value),
+        };
+      };
+      return {
+        ...updatedAccumulator, 
+        [oldKey]: element.oldValue, 
+        [formattedKey]: element.value,
+      };
+    } 
+    if (Array.isArray(element.value)) {
+      return {
+        ...updatedAccumulator, 
+        [formattedKey]: transformDiffArrayToObject(element.value),
+      };
+    };
+    return {
+      ...updatedAccumulator, 
+      [formattedKey]: element.value,
+    };
+  }, {});
 };
 
-export default (dataTree) => {
-  const traverse = (currentNode, level) => {
-    const indentLines = createIndent(level);
-    const entries = currentNode.map((node) => {
-      const { status, property } = node;
-      const safeProperty = property !== undefined ? property : 'undefined';
-
-      if (status === 'exchanged') {
-        const { values } = node;
-        const { from: oldValue, to: newValue } = values;
-        return [
-          `${indentLines}${getStatusMarker('expected')} ${safeProperty}: ${convertToString(oldValue, level + 1)}`,
-          `${indentLines}${getStatusMarker('received')} ${safeProperty}: ${convertToString(newValue, level + 1)}`,
-        ].join('\n');
-      }
-      if (status === 'nested') {
-        const { children } = node;
-        return `${indentLines}${getStatusMarker('matched')} ${safeProperty}: ${traverse(children, level + 1)}`;
-      }
-      const { value } = node;
-      return `${indentLines}${getStatusMarker(status)} ${safeProperty}: ${convertToString(value, level + 1)}`;
-    });
-    const indentBrackets = createIndent(level, 4, 4);
-    return `{\n${entries.join('\n')}\n${indentBrackets}}`;
+const formatObjectToString = (objectDiff, indent = '    ') => {
+  const recursiveStringify = (data, level) => {
+    if (!_.isObject(data)) {
+      return `${data}`;
+    };
+    const entries = Object.entries(data);
+    const resultString = entries.reduce((acc, [key, value]) => {
+      const currentIndent = (key.startsWith(' ')) ? (indent.repeat(level - 1)) : indent.repeat(level);
+      const newAccumulator = `${acc}${currentIndent}${key}: ${recursiveStringify(value, level + 1)}\n`;
+      return newAccumulator;
+    }, '');
+    return `{\n${resultString}${indent.repeat(level - 1)}}`;
   };
-  return traverse(dataTree, 1);
+  return recursiveStringify(objectDiff, 1);
 };
+
+const stylishDiffFormatter = (diffArray) => formatObjectToString(transformDiffArrayToObject(diffArray));
+
+export default stylishDiffFormatter;
