@@ -15,13 +15,17 @@
 
 2. Переход в директорию проекта:
     
+     ```bash
     cd frontend-project-46
 
 3. Установка необходимых модулей:
 
+     ```bash
     npm ci
+
 4. Установка пакета в систему
 
+    ```bash
     npm link
 
 ### Примеры использования
@@ -30,11 +34,11 @@
 
 Определение разницы между двумя структурами данных (по-умолчанию формат вывода stylish)
 
-//формат stylish
-$ gendiff --format stylish filepath1 filepath2
+### формат stylish
+gendiff --format stylish filepath1 filepath2
 
-//формат plain
+### ормат plain
 gendiff --format plain filepath1 filepath2
 
-//формат json
+### формат json
 gendiff --format json filepath1 filepath2
