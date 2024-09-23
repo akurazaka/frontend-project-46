@@ -6,4 +6,12 @@ const parsers = {
   yaml: yaml.load,
 };
 
-export default (ext, data) => parsers[ext](data);
+const parseData = (extension, data) => {
+  const parser = parsers[extension];
+  if (!parser) {
+    throw new Error(`Unsupported file extension: ${extension}`);
+  }
+  return parser(data);
+};
+
+export default parseData;
