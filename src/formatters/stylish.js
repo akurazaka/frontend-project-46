@@ -1,52 +1,54 @@
 import _ from 'lodash';
 
 const markers = {
-  added: '+',
-  removed: '-',
-  unchanged: ' ',
-  nested: ' ',
+  matched: ' ',
+  expected: '-',
+  received: '+',
 };
-
-const createIndent = (level) => {
-  const space = ' ';
-  return space.repeat(level * 4 - 2);
-};
-
-const convertToString = (data, level = 1) => {
-  if (!_.isObject(data)) {
-    return data;
+const getMarker = (stat) => {
+  if (!(_.has(markers, stat))) {
+    throw new Error(`Unknown stat "${stat}"`);
   }
-  const propertyNames = Object.keys(data);
-  const formattedProperties = propertyNames.map(
-    (property) => `${createIndent(level + 1)}  ${property}: ${convertToString(
-      data[property],
-      level + 1,
-    )}`,
-  );
-  return `{\n${formattedProperties.join('\n')}\n  ${createIndent(level)}}`;
+  return markers[stat];
 };
 
-const formatStylishly = (data, level = 1) => {
-  switch (data.type) {
-    case 'added':
-    case 'deleted':
-    case 'unchanged':
-      return `${createIndent(level)}${markers[data.type]} ${
-        data.key
-      }: ${convertToString(data.value, level)}`;
-    case 'changed':
-      return `${createIndent(level)}${markers.removed} ${
-        data.key
-      }: ${convertToString(data.valueBefore, level)}\n${createIndent(level)}${
-        markers.added
-      } ${data.key}: ${convertToString(data.valueAfter, level)}`;
-    case 'nested':
-      return `${createIndent(level)}  ${data.key}: {\n${data.children
-        .map((child) => formatStylishly(child, level + 1))
-        .join('\n')}\n ${createIndent(level)} }`;
-    default:
-      throw new Error(`Unknown type: ${data.type}`);
+const composeIndent = (depth, spacesCount = 4, offset = 2) => ' '.repeat((depth * spacesCount) - offset);
+const stringify = (item, depth) => {
+  if (!(_.isPlainObject(item))) {
+    return `${item}`;
   }
+  const indentLines = composeIndent(depth);
+  const items = Object
+    .entries(item)
+    .map(([key, value]) => `${indentLines}${getMarker('matched')} ${key}: ${stringify(value, depth + 1)}`);
+
+  const indentBrackets = composeIndent(depth, 4, 4);
+  return `{\n${items.join('\n')}\n${indentBrackets}}`;
 };
 
-export default (changes) => `{\n${changes.map((change) => formatStylishly(change, 1)).join('\n')}\n}`;
+export default (tree) => {
+  const iter = (currentNode, depth) => {
+    const indentLines = composeIndent(depth);
+    const items = currentNode
+      .map((node) => {
+        const { stat, key } = node;
+        if (stat === 'exchanged') {
+          const { values } = node;
+          const { from: valueFrom, to: valueTo } = values;
+          return [
+            `${indentLines}${getMarker('expected')} ${key}: ${stringify(valueFrom, depth + 1)}`,
+            `${indentLines}${getMarker('received')} ${key}: ${stringify(valueTo, depth + 1)}`,
+          ].join('\n');
+        }
+        if (stat === 'nested') {
+          const { children } = node;
+          return `${indentLines}${getMarker('matched')} ${key}: ${iter(children, depth + 1)}`;
+        }
+        const { value } = node;
+        return `${indentLines}${getMarker(stat)} ${key}: ${stringify(value, depth + 1)}`;
+      });
+    const indentBrackets = composeIndent(depth, 4, 4);
+    return `{\n${items.join('\n')}\n${indentBrackets}}`;
+  };
+  return iter(tree, 1);
+};
