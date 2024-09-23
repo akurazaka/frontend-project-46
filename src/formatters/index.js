@@ -1,13 +1,16 @@
-import plain from './plain.js';
 import stylish from './stylish.js';
-import json from './json.js';
+import plain from './plain.js';
 
-const chooseFormat = (data, format) => {
-  switch (format) {
-    case 'plain': return plain(data);
-    case 'json': return json(data);
-    default: return stylish(data);
+const getFormat = (tree, formatter) => {
+  if (formatter === 'stylish') {
+    return stylish(tree);
+  }
+  if (formatter === 'plain') {
+    return plain(tree);
+  }
+  if (formatter === 'json') {
+    return JSON.stringify(tree, null, 4);
   }
 };
 
-export default chooseFormat;
+export default getFormat;
