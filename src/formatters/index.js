@@ -1,10 +1,13 @@
-import stylish from './stylish.js';
 import plain from './plain.js';
+import stylish from './stylish.js';
+import json from './json.js';
 
-const formats = {
-  stylish,
-  plain,
-  json: (data) => JSON.stringify(data, null, 2),
+const chooseFormat = (data, format) => {
+  switch (format) {
+    case 'plain': return plain(data);
+    case 'json': return json(data);
+    default: return stylish(data);
+  }
 };
 
-export default (data, format) => formats[format](data);
+export default chooseFormat;
