@@ -1,15 +1,10 @@
 import stylish from './stylish.js';
 import plain from './plain.js';
-import json from './json.js';
 
-const formatter = (result, type) => {
-  if (type === 'plain') {
-    return plain(result);
-  }
-  if (type === 'json') {
-    return json(result);
-  }
-  return stylish(result);
+const formats = {
+  stylish,
+  plain,
+  json: (data) => JSON.stringify(data, null, 2),
 };
 
-export default formatter;
+export default (data, format) => formats[format](data);
