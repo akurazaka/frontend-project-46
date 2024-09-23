@@ -6,10 +6,4 @@ const parsers = {
   yaml: yaml.load,
 };
 
-
-export default (extname, data) => {
-  if (!parsers[extname]) {
-    throw new Error(`Cannot find parser for "${extname}"`);
-  }
-  return parsers[extname](data);
-};
+export default (ext, data) => parsers[ext](data);
