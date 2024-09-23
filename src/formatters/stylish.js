@@ -1,55 +1,42 @@
 import _ from 'lodash';
 
-const space = ' ';
-const SPACES_PER_INDENT = 4;
+const getIndent = (depth) => ' '.repeat(depth * 4 - 2);
 
-const calculateIndent = (level) => level * SPACES_PER_INDENT;
-const buildIndent = (level) => space.repeat(calculateIndent(level) - 2);
-const buildBracketIndent = (level) => space.repeat(calculateIndent(level) - SPACES_PER_INDENT);
-
-const formatLine = (prefix, key, value, indent) => `${indent}${prefix}${key}: ${value}`;
-
-const formatData = (data, depth) => {
-  if (!_.isObject(data)) {
-    return data;
+const stringify = (value, depth) => {
+  if (typeof value === 'object' && value !== null) {
+    const indent = getIndent(depth + 1);
+    const closingIndent = getIndent(depth);
+    const lines = Object.entries(value)
+      .map(([key, val]) => `${indent}${key}: ${stringify(val, depth + 1)}`);
+    return `{\n${lines.join('\n')}\n${closingIndent}}`;
   }
-
-  const indent = buildIndent(depth);
-  const bracketIndent = buildBracketIndent(depth);
-  const formattedEntries = Object.keys(data).map((key) =>
-    formatLine('  ', key, formatData(data[key], depth + 1), indent)
-  );
-
-  return ['{', ...formattedEntries, `${bracketIndent}}`].join('\n');
+  return String(value);
 };
 
-const renderTree = (tree) => {
-  const traverse = (nodes, depth) => {
-    const indent = buildIndent(depth);
-    const bracketIndent = buildBracketIndent(depth);
-  
-    const lines = nodes.map((node) => {
-      switch (node.type) {
-        case 'added':
-          return formatLine('+ ', node.key, formatData(node.value, depth + 1), indent);
-        case 'deleted':
-          return formatLine('- ', node.key, formatData(node.value, depth + 1), indent);
-        case 'changed':
-          const oldValue = node.value?.old ?? 'undefined';
-          const newValue = node.value?.new ?? 'undefined';
-          return `${formatLine('- ', node.key, formatData(oldValue, depth + 1), indent)}\n${formatLine('+ ', node.key, formatData(newValue, depth + 1), indent)}`;
-        case 'node':
-        case 'nested':
-          return formatLine('  ', node.key, traverse(node.children, depth + 1), indent);
-        case 'unchanged':
-          return formatLine('  ', node.key, formatData(node.value, depth + 1), indent);
-      }
-    });
-
-    return ['{', ...lines, `${bracketIndent}}`].join('\n');
-  };
-
-  return traverse(tree, 1);
+const stylish = (diff, depth = 1) => {
+  const lines = diff.map((node) => {
+    const indent = getIndent(depth);
+    switch (node.type) {
+      case 'added':
+        return `${indent}+ ${node.key}: ${stringify(node.value, depth)}`;
+      case 'removed':
+        return `${indent}- ${node.key}: ${stringify(node.value, depth)}`;
+      case 'nested':
+        return `${indent}  ${node.key}: ${stylish(node.children, depth + 1)}`;
+      case 'unchanged':
+        return `${indent}  ${node.key}: ${stringify(node.value, depth)}`;
+      case 'changed':
+        return [
+          `${indent}- ${node.key}: ${stringify(node.oldValue, depth)}`,
+          `${indent}+ ${node.key}: ${stringify(node.newValue, depth)}`,
+        ].join('\n');
+      default:
+        throw new Error(`Unknown node type: ${node.type}`);
+    }
+  });
+  const closingIndent = getIndent(depth - 1);
+  return `{\n${lines.join('\n')}\n${closingIndent}}`;
 };
 
-export default renderTree;
+export default stylish;
+
