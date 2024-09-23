@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1727086042514" clover="3.2.0">
-  <project timestamp="1727086042514" name="All files">
+<coverage generated="1727101520729" clover="3.2.0">
+  <project timestamp="1727101520729" name="All files">
     <metrics statements="27" coveredstatements="23" conditionals="20" coveredconditionals="13" methods="6" coveredmethods="6" elements="53" coveredelements="42" complexity="0" loc="27" ncloc="27" packages="2" files="3" classes="3"/>
     <package name="src">
       <metrics statements="14" coveredstatements="12" conditionals="10" coveredconditionals="7" methods="2" coveredmethods="2"/>
-      <file name="diff.js" path="C:\Users\IT\Desktop\JS\ALFASTRAH\hexlet\Проект 2\frontend-project-46\src\diff.js">
+      <file name="buildDifferenceTree.js" path="C:\Users\IT\Desktop\JS\ALFASTRAH\hexlet\Проект 2\frontend-project-46\src\buildDifferenceTree.js">
         <metrics statements="14" coveredstatements="12" conditionals="10" coveredconditionals="7" methods="2" coveredmethods="2"/>
         <line num="1" count="1" type="stmt"/>
         <line num="2" count="1" type="stmt"/>
