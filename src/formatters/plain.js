@@ -1,26 +1,28 @@
-const plain = (diff) => {
-    const iter = (nodes, parentKey = '') => {
-      return nodes.flatMap((node) => {
-        const { key, action, value, children } = node;
-        const currentKey = parentKey ? `${parentKey}.${key}` : key;
-  
-        switch (action) {
-          case 'added':
-            return `Property '${currentKey}' was added with value: ${value === null ? 'null' : value}`;
-          case 'removed':
-            return `Property '${currentKey}' was removed`;
-          case 'updated':
-            return `Property '${currentKey}' was updated. From ${value.old} to ${value.new}`;
-          case 'nested':
-            return iter(children, currentKey);
-          default:
-            return [];
-        }
-      }).join('\n');
-    };
-  
-    return iter(diff);
-  };
-  
-  export default plain;
-  
+import _ from 'lodash';
+
+const formatValue = (val) => {
+  if (_.isObject(val)) {
+    return '[complex value]';
+  }
+  return typeof val === 'string' ? `'${val}'` : val;
+};
+
+const generatePlainOutput = (item, parentKey = '') => {
+  switch (item.type) {
+    case 'added':
+      return `Property '${parentKey}${item.key}' was added with value: ${formatValue(item.value)}`;
+    case 'deleted':
+      return `Property '${parentKey}${item.key}' was removed`;
+    case 'unchanged':
+      return null;
+    case 'changed':
+      return `Property '${parentKey}${item.key}' was updated. From ${formatValue(item.valueBefore)} to ${formatValue(item.valueAfter)}`;
+    case 'nested':
+      return item.children.map((child) => generatePlainOutput(child, `${parentKey}${item.key}.`))
+        .filter((result) => result !== null).join('\n');
+    default:
+      throw new Error(`Unknown type: ${item.type}`);
+  }
+};
+
+export default (plainDiff) => `${plainDiff.map((element) => generatePlainOutput(element)).join('\n').trim()}`;
