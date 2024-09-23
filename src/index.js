@@ -1,16 +1,16 @@
 import parseFile from './parsers.js';
-import genDiff from './diff.js';
+import diff from './diff.js'
 import getFormatter from './formatters/index.js';
 
-const run = (filePath1, filePath2, formatName = 'stylish') => {
+const genDiff = (filePath1, filePath2, formatName = 'stylish') => {
   const obj1 = parseFile(filePath1);
   const obj2 = parseFile(filePath2);
-  const diff = genDiff(obj1, obj2);
+  const diff = diff(obj1, obj2);
   const formatter = getFormatter(formatName);
   return formatter(diff);
 };
 
-export default run;
+export default genDiff;
 
 const file1 = process.argv[2];
 const file2 = process.argv[3];

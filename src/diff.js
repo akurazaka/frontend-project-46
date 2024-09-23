@@ -1,4 +1,4 @@
-const genDiff = (obj1, obj2) => {
+const diff = (obj1, obj2) => {
     const keys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
     const result = [];
   
@@ -8,7 +8,7 @@ const genDiff = (obj1, obj2) => {
       } else if (!Object.hasOwn(obj1, key)) {
         result.push({ key, type: 'added', value: obj2[key] });
       } else if (obj1[key] instanceof Object && obj2[key] instanceof Object) {
-        result.push({ key, type: 'nested', children: genDiff(obj1[key], obj2[key]) });
+        result.push({ key, type: 'nested', children: diff(obj1[key], obj2[key]) });
       } else if (obj1[key] !== obj2[key]) {
         result.push({ key, type: 'changed', oldValue: obj1[key], newValue: obj2[key] });
       } else {
@@ -19,5 +19,5 @@ const genDiff = (obj1, obj2) => {
     return result;
   };
   
-export default genDiff;
+export default diff;
   
