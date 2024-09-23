@@ -1,66 +1,49 @@
 import _ from 'lodash';
 
-const formatKeyName = (key, changeType, element) => {
-  if ((changeType === 'added') || ((changeType === 'changed') && (Object.hasOwn(element, 'oldValue')))) {
-    return `  + ${key}`;
-  } 
-  if (changeType === 'deleted') {
-    return `  - ${key}`;
-  }
-  return `    ${key}`;
+const replacer = ' ';
+const spaceCount = 4;
+
+const getIndentSize = (depth) => depth * spaceCount;
+const getIndent = (depth) => replacer.repeat(getIndentSize(depth) - 2);
+const getIndentBracket = (depth) => replacer.repeat(getIndentSize(depth) - spaceCount);
+
+const createString = (type, key, value, indent) => `${indent}${type}${key}: ${value}`;
+
+const stringify = (data, count) => {
+  if (!_.isObject(data)) { return data; }
+
+  const indent = getIndent(count);
+  const indentBracket = getIndentBracket(count);
+  const result = Object.keys(data).map((key) => createString('  ', key, stringify(data[key], count + 1), indent));
+
+  return ['{', ...result, `${indentBracket}}`].join('\n');
 };
 
-const transformDiffArrayToObject = (diffArray) => {
-  return diffArray.reduce((accumulator, element) => {
-    // Добавляем проверки для имени ключа (element.name)
-    const safeKey = element.name !== undefined ? element.name : 'undefined';
-    const formattedKey = formatKeyName(safeKey, element.diff, element);
-    const updatedAccumulator = accumulator;
+const stylish = (tree) => {
+  const iter = (currentValue, count) => {
+    const indent = getIndent(count);
+    const indentBracket = getIndentBracket(count);
+    const result = currentValue.map((item) => {
+      switch (item.type) {
+        case 'added':
+          return createString('+ ', item.key, stringify(item.value, count + 1), indent);
+        case 'deleted':
+          return createString('- ', item.key, stringify(item.value, count + 1), indent);
+        case 'changed':
+          return `${createString('- ', item.key, stringify(item.value.old, count + 1), indent)}\n${createString('+ ', item.key, stringify(item.value.new, count + 1), indent)}`;
+        case 'node':
+          return createString('  ', item.key, iter(item.children, count + 1), indent);
+        case 'unchanged':
+          return createString('  ', item.key, stringify(item.value, count + 1), indent);
+        default:
+          throw new Error(`Error type - ${item.type}`);
+      }
+    });
 
-    if (Object.hasOwn(element, 'oldValue')) {
-      const oldKey = `  - ${safeKey}`;
-      if (Array.isArray(element.value)) {
-        return {
-          ...updatedAccumulator, 
-          [oldKey]: element.oldValue, 
-          [formattedKey]: transformDiffArrayToObject(element.value),
-        };
-      };
-      return {
-        ...updatedAccumulator, 
-        [oldKey]: element.oldValue, 
-        [formattedKey]: element.value,
-      };
-    } 
-    if (Array.isArray(element.value)) {
-      return {
-        ...updatedAccumulator, 
-        [formattedKey]: transformDiffArrayToObject(element.value),
-      };
-    };
-    return {
-      ...updatedAccumulator, 
-      [formattedKey]: element.value,
-    };
-  }, {});
-};
-
-const formatObjectToString = (objectDiff, indent = '    ') => {
-  const recursiveStringify = (data, level) => {
-    if (!_.isObject(data)) {
-      return `${data}`;
-    };
-    const entries = Object.entries(data);
-    const resultString = entries.reduce((acc, [key, value]) => {
-      const currentIndent = (key.startsWith(' ')) ? (indent.repeat(level - 1)) : indent.repeat(level);
-      const newAccumulator = `${acc}${currentIndent}${key}: ${recursiveStringify(value, level + 1)}\n`;
-      return newAccumulator;
-    }, '');
-    return `{\n${resultString}${indent.repeat(level - 1)}}`;
+    return ['{', ...result, `${indentBracket}}`].join('\n');
   };
-  return recursiveStringify(objectDiff, 1);
+
+  return iter(tree, 1);
 };
 
-const stylishDiffFormatter = (diffArray) => formatObjectToString(transformDiffArrayToObject(diffArray));
-
-export default stylishDiffFormatter;
+export default stylish;

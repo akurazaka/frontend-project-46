@@ -1,26 +1,22 @@
-import _ from 'lodash';
+const buildDifferenceTree = (obj1, obj2) => {
+  const keys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
+  const result = [];
 
-const buildDifferenceTree = (data1, data2) => {
-  const sortedKeysArr = _.sortBy(Object.keys({ ...data1, ...data2 }));
-  return sortedKeysArr.map((key) => {
-    if (!_.has(data1, key)) {
-      return { type: 'added', key, value: data2[key] };
+  keys.forEach((key) => {
+    if (!Object.hasOwn(obj2, key)) {
+      result.push({ key, type: 'removed', value: obj1[key] });
+    } else if (!Object.hasOwn(obj1, key)) {
+      result.push({ key, type: 'added', value: obj2[key] });
+    } else if (obj1[key] instanceof Object && obj2[key] instanceof Object) {
+      result.push({ key, type: 'nested', children: buildDifferenceTree(obj1[key], obj2[key]) });
+    } else if (obj1[key] !== obj2[key]) {
+      result.push({ key, type: 'changed', oldValue: obj1[key], newValue: obj2[key] });
+    } else {
+      result.push({ key, type: 'unchanged', value: obj1[key] });
     }
-
-    if (!_.has(data2, key)) {
-      return { type: 'deleted', key, value: data1[key] };
-    }
-
-    if (_.isObject(data1[key]) && _.isObject(data2[key])) {
-      return { type: 'node', key, children: buildDifferenceTree(data1[key], data2[key]) };
-    }
-
-    if (data1[key] !== data2[key]) {
-      return { type: 'changed', key, value: { old: data1[key], new: data2[key] } };
-    }
-
-    return { type: 'unchanged', key, value: data1[key] };
   });
+
+  return result;
 };
 
 export default buildDifferenceTree;
