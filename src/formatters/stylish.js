@@ -34,7 +34,8 @@ const stylish = (diff, depth = 1) => {
       case 'removed':
         return createString('- ', node.key, stringify(node.value, depth), indent);
       case 'changed':
-        return `${createString('- ', node.key, stringify(node.value.old, depth), indent)}\n${createString('+ ', node.key, stringify(node.value.new, depth), indent)}`;
+        return `${createString('- ', node.key, stringify(node.value.old, depth + 1), indent)}
+        ${createString('+ ', node.key, stringify(node.value.new, depth + 1), indent)}`;
       case 'nested':
         return createString('  ', node.key, stylish(node.children, depth + 1), indent);
       case 'unchanged':
