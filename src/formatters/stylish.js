@@ -1,28 +1,17 @@
-const stringify = (value, depth) => {
-  if (typeof value !== 'object' || value === null) {
-    return String(value);
-  }
-
-  const indent = getIndent(depth + 1);
-  const lines = Object.entries(value).map(
-    ([key, val]) => `${indent}${key}: ${stringify(val, depth + 1)}`
-  );
-
-  return `{\n${lines.join('\n')}\n${getIndent(depth)}}`;
-};
+const getIndent = (depth) => ' '.repeat(depth * 4);
 
 const stylish = (diff, depth = 1) => {
   const lines = diff.map((node) => {
     const indent = getIndent(depth);
     switch (node.type) {
       case 'added':
-        return `${indent}+ ${node.key}: ${stringify(node.value, depth)}`;
+        return `${indent}+ ${node.key}: ${node.value}`;
       case 'removed':
-        return `${indent}- ${node.key}: ${stringify(node.value, depth)}`;
+        return `${indent}- ${node.key}: ${node.value}`;
       case 'unchanged':
-        return `${indent}  ${node.key}: ${stringify(node.value, depth)}`;
+        return `${indent}  ${node.key}: ${node.value}`;
       case 'changed':
-        return `${indent}- ${node.key}: ${stringify(node.oldValue, depth)}\n${indent}+ ${node.key}: ${stringify(node.newValue, depth)}`;
+        return `${indent}- ${node.key}: ${node.oldValue}\n${indent}+ ${node.key}: ${node.newValue}`;
       case 'nested':
         return `${indent}  ${node.key}: {\n${stylish(node.children, depth + 1)}\n${indent}  }`;
       default:
@@ -31,6 +20,5 @@ const stylish = (diff, depth = 1) => {
   });
   return lines.join('\n');
 };
-
 
 export default stylish;
