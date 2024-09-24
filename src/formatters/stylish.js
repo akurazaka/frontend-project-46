@@ -1,50 +1,50 @@
 import _ from 'lodash';
 
-const nodeStates = {
+const states = {
   added: '+ ',
   removed: '- ',
-  unchanged: '  ',
   nested: '  ',
   updated: ['- ', '+ '],
+  unchanged: '  ',
 };
 
-const formatValue = (data, level) => {
-  const indentWidth = 4;
-  const currentIndent = level * indentWidth + indentWidth;
-  const closingBracketIndent = currentIndent - indentWidth;
-  const space = ' ';
-  if (!_.isObject(data)) {
-    return data;
+const defineValue = (value, depth) => {
+  const spacesCount = 4;
+  const indentSize = depth * spacesCount + spacesCount;
+  const bracketIndent = indentSize - spacesCount;
+  const blank = ' ';
+  if (!_.isObject(value)) {
+    return value;
   }
-  const entries = Object.entries(data);
-  const formattedEntries = entries.map(([key, val]) => `${space.repeat(currentIndent)}${key}: ${formatValue(val, level + 1)}`);
-  return ['{', ...formattedEntries, `${space.repeat(closingBracketIndent)}}`].join('\n');
+  const entries = Object.entries(value);
+  const result = entries.map(([key, val]) => `${blank.repeat(indentSize)}${key}: ${defineValue(val, depth + 1)}`);
+  return ['{', ...result, `${blank.repeat(bracketIndent)}}`].join('\n');
 };
 
-const stylish = (diffTree) => {
-  const processNode = (node, level) => {
-    const indentWidth = 4;
-    const leftShift = 2;
-    const currentIndent = level * indentWidth - leftShift;
-    const space = ' ';
-    const closingBracketIndent = currentIndent + leftShift;
+const stylish = (tree) => {
+  const innerFunc = (node, depth) => {
+    const spacesCount = 4;
+    const leftIndent = 2;
+    const indentSize = depth * spacesCount - leftIndent;
+    const blank = ' ';
+    const bracketIndent = indentSize + leftIndent;
 
     const {
-      name, status, currentValue, previousValue, updatedValue,
+      key, state, value, oldValue, newValue,
     } = node;
 
-    if (node.status !== 'nested' && node.status !== 'updated') {
-      return `${space.repeat(currentIndent)}${nodeStates[status]}${name}: ${formatValue(currentValue, level)}`;
+    if (node.state !== 'nested' && node.state !== 'updated') {
+      return `${blank.repeat(indentSize)}${states[state]}${key}: ${defineValue(value, depth)}`;
     }
-    if (node.status === 'updated') {
-      return `${space.repeat(currentIndent)}${nodeStates[status][0]}${name}: ${formatValue(previousValue, level)}\n${space.repeat(currentIndent)}${nodeStates[status][1]}${name}: ${formatValue(updatedValue, level)}`;
+    if (node.state === 'updated') {
+      return `${blank.repeat(indentSize)}${states[state][0]}${key}: ${defineValue(oldValue, depth)}\n${blank.repeat(indentSize)}${states[state][1]}${key}: ${defineValue(newValue, depth)}`;
     }
-    if (node.status === 'nested') {
-      return `${space.repeat(currentIndent)}${nodeStates[status]}${name}: {\n${node.currentValue.map((childNode) => processNode(childNode, level + 1)).join('\n')}\n${space.repeat(closingBracketIndent)}}`;
+    if (node.state === 'nested') {
+      return `${blank.repeat(indentSize)}${states[state]}${key}: {\n${node.value.map((el) => innerFunc(el, depth + 1)).join('\n')}\n${blank.repeat(bracketIndent)}}`;
     }
-    throw new Error(`Invalid node status - ${status}`);
+    throw new Error(`Invalid node state - ${state}`);
   };
-  return `{\n${diffTree.map((childNode) => processNode(childNode, 1)).join('\n')}\n}`;
+  return `{\n${tree.map((el) => innerFunc(el, 1)).join('\n')}\n}`;
 };
 
 export default stylish;
