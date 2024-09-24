@@ -15,7 +15,12 @@ const plain = (diffTree) => {
     const {
       name, status, currentValue, previousValue, updatedValue,
     } = node;
-    switch (node.status) {
+
+    if (!status) {
+      throw new Error(`Node is missing status: ${JSON.stringify(node)}`);
+    }
+
+    switch (status) {
       case 'added':
         return `Property '${name}' was ${status} with value: ${formatValue(currentValue)}`;
       case 'updated':
