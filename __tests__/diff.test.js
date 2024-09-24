@@ -23,7 +23,9 @@ describe('buildDifferenceTree', () => {
     const result = buildDifferenceTree(data1, data2);
 
     const expected = [
-      { key: 'key1', state: 'updated', oldValue: 'value1', newValue: 'newValue1' },
+      {
+         key: 'key1', state: 'updated', oldValue: 'value1', newValue: 'newValue1', 
+      },
     ];
 
     expect(result).toEqual(expected);
@@ -40,7 +42,9 @@ describe('buildDifferenceTree', () => {
         key: 'key1',
         state: 'nested',
         value: [
-          { key: 'nestedKey', state: 'updated', oldValue: 'value1', newValue: 'value2' },
+          { 
+            key: 'nestedKey', state: 'updated', oldValue: 'value1', newValue: 'value2', 
+          },
         ],
       },
     ];
