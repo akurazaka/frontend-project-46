@@ -1,7 +1,7 @@
 import stylish from './stylish.js';
 import plain from './plain.js';
 
-const getFormat = (tree, formatter) => {
+const getFormat = (tree, formatter = 'stylish') => {
   if (formatter === 'stylish') {
     return stylish(tree);
   }
