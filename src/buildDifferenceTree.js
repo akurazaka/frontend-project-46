@@ -1,19 +1,28 @@
-const buildDifferenceTree = (obj1, obj2) => {
-  const keys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
-  const result = [];
+import _ from 'lodash';
 
-  keys.forEach((key) => {
-    if (!Object.hasOwn(obj2, key)) {
-      result.push({ key, type: 'removed', value: obj1[key] });
-    } else if (!Object.hasOwn(obj1, key)) {
-      result.push({ key, type: 'added', value: obj2[key] });
-    } else if (obj1[key] instanceof Object && obj2[key] instanceof Object) {
-      result.push({ key, type: 'nested', children: buildDifferenceTree(obj1[key], obj2[key]) });
-    } else if (obj1[key] !== obj2[key]) {
-      result.push({ key, type: 'changed', oldValue: obj1[key], newValue: obj2[key] });
-    } else {
-      result.push({ key, type: 'unchanged', value: obj1[key] });
+const buildDifferenceTree = (data1, data2) => {
+  const keys1 = Object.keys(data1);
+  const keys2 = Object.keys(data2);
+
+  const keys = [...new Set([...keys1, ...keys2])];
+  const sortedKeys = _.orderBy(keys);
+
+  const result = sortedKeys.map((key) => {
+    if (!Object.hasOwn(data2, key)) {
+      return { key, state: 'removed', value: data1[key] };
     }
+    if (!Object.hasOwn(data1, key)) {
+      return { key, state: 'added', value: data2[key] };
+    }
+    if (_.isPlainObject(data1[key]) && _.isPlainObject(data2[key])) {
+      return { key, state: 'nested', value: buildDifferenceTree(data1[key], data2[key]) };
+    }
+    if (data1[key] !== data2[key]) {
+      return {
+        key, state: 'updated', oldValue: data1[key], newValue: data2[key],
+      };
+    }
+    return { key, state: 'unchanged', value: data1[key] };
   });
 
   return result;
