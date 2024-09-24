@@ -3,7 +3,6 @@ import _ from 'lodash';
 const buildDifferenceTree = (data1, data2) => {
   const keys1 = Object.keys(data1);
   const keys2 = Object.keys(data2);
-
   const keys = [...new Set([...keys1, ...keys2])];
   const sortedKeys = _.orderBy(keys);
 
