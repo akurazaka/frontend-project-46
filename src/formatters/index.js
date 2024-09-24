@@ -9,7 +9,7 @@ const getFormat = (tree, formatter = 'stylish') => {
     return plain(tree);
   }
   if (formatter === 'json') {
-    return JSON.stringify(tree, null, 4);
+    return JSON.stringify(tree, null, 2);
   }
 };
 
