@@ -18,7 +18,7 @@ const buildDifferenceTree = (data1, data2) => {
     }
     if (data1[key] !== data2[key]) {
       return {
-        key, state: 'updated', value1: data1[key], value2: data2[key],
+        key, state: 'updated', oldValue: data1[key], newValue: data2[key],
       };
     }
     return { key, state: 'unchanged', value: data1[key] };
