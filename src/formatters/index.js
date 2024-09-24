@@ -1,7 +1,7 @@
 import stylish from './stylish.js';
 import plain from './plain.js';
 
-const getFormat = (tree, formatter = 'stylish') => {
+const getFormat = (tree, formatter) => {
   switch (formatter) {
     case 'stylish':
       return stylish(tree);
