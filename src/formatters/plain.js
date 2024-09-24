@@ -1,45 +1,40 @@
 import _ from 'lodash';
 
-const formatValue = (input) => {
-  if (_.isObject(input)) {
+const defineValue = (value) => {
+  if (_.isObject(value)) {
     return '[complex value]';
   }
-  if (typeof input === 'string') {
-    return `'${input}'`;
+  if (typeof value === 'string') {
+    return `'${value}'`;
   }
-  return input;
+  return value;
 };
 
-const plain = (diffTree) => {
-  const processNode = (node) => {
+const plain = (tree) => {
+  const innerFunc = (node) => {
     const {
-      name, status, currentValue, previousValue, updatedValue,
+      key, state, value, oldValue, newValue,
     } = node;
-
-    if (!status) {
-      return [];
-    }
-
-    switch (status) {
+    switch (node.state) {
       case 'added':
-        return `Property '${name}' was ${status} with value: ${formatValue(currentValue)}`;
+        return `Property '${key}' was ${state} with value: ${defineValue(value)}`;
       case 'updated':
-        return `Property '${name}' was ${status}. From ${formatValue(previousValue)} to ${formatValue(updatedValue)}`;
+        return `Property '${key}' was ${state}. From ${defineValue(oldValue)} to ${defineValue(newValue)}`;
       case 'unchanged':
         return [];
       case 'removed':
-        return `Property '${name}' was ${status}`;
+        return `Property '${key}' was ${state}`;
       case 'nested':
-        return currentValue.flatMap((childNode) => {
-          const childKey = `${name}.${childNode.name}`;
-          const updatedChildNode = { ...childNode, name: childKey };
-          return processNode(updatedChildNode);
+        return value.flatMap((el) => {
+          const newKey = `${key}.${el.key}`;
+          const newEl = { ...el, key: newKey };
+          return innerFunc(newEl);
         });
       default:
-        throw new Error(`Invalid node status - ${status}`);
+        throw new Error(`Invalid node state - ${state}`);
     }
   };
-  return diffTree.flatMap(processNode).join('\n');
+  return tree.flatMap(innerFunc).join('\n');
 };
 
 export default plain;
