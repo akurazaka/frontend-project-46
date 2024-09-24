@@ -6,6 +6,5 @@ test('JSON formatter', () => {
     { key: 'common.setting2', status: 'removed' },
   ];
   const expected = JSON.stringify(diff, null, 2);
-  
   expect(jsonFormatter(diff)).toEqual(expected);
 });

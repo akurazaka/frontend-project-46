@@ -13,8 +13,13 @@ const formatValue = (data) => {
 const plain = (diffTree) => {
   const processNode = (diffNode) => {
     const {
-      key: propertyName, state: changeType, value: newValue, oldValue: previousValue, newValue: updatedValue,
+      key: propertyName, 
+      state: changeType, 
+      value: newValue, 
+      oldValue: previousValue, 
+      newValue: updatedValue,
     } = diffNode;
+
     switch (diffNode.state) {
       case 'added':
         return `Property '${propertyName}' was ${changeType} with value: ${formatValue(newValue)}`;

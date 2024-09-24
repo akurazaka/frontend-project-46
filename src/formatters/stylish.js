@@ -14,7 +14,6 @@ const formatValue = (data, level) => {
   const closingBracketIndent = currentIndent - indentLevel;
   const space = ' ';
 
-
   if (!_.isObject(data)) {
     return data;
   }
@@ -32,7 +31,11 @@ const stylish = (diffTree) => {
     const space = ' ';
     const closingBracketIndent = currentIndent + offset;
     const {
-      key: propertyName, state: changeType, value: newValue, oldValue: previousValue, newValue: updatedValue,
+      key: propertyName, 
+      state: changeType, 
+      value: newValue, 
+      oldValue: previousValue, 
+      newValue: updatedValue,
     } = diffNode;
 
     if (diffNode.state !== 'nested' && diffNode.state !== 'updated') {
