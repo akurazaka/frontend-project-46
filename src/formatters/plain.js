@@ -17,7 +17,7 @@ const plain = (diffTree) => {
     } = node;
 
     if (!status) {
-      throw new Error(`Node is missing status: ${JSON.stringify(node)}`);
+      return [];
     }
 
     switch (status) {
