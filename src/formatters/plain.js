@@ -1,40 +1,40 @@
 import _ from 'lodash';
 
-const defineValue = (value) => {
-  if (_.isObject(value)) {
+const formatValue = (data) => {
+  if (_.isObject(data)) {
     return '[complex value]';
   }
-  if (typeof value === 'string') {
-    return `'${value}'`;
+  if (typeof data === 'string') {
+    return `'${data}'`;
   }
-  return value;
+  return data;
 };
 
-const plain = (tree) => {
-  const innerFunc = (node) => {
+const plain = (diffTree) => {
+  const processNode = (diffNode) => {
     const {
-      key, state, value, oldValue, newValue,
-    } = node;
-    switch (node.state) {
+      key: propertyName, state: changeType, value: newValue, oldValue: previousValue, newValue: updatedValue,
+    } = diffNode;
+    switch (diffNode.state) {
       case 'added':
-        return `Property '${key}' was ${state} with value: ${defineValue(value)}`;
+        return `Property '${propertyName}' was ${changeType} with value: ${formatValue(newValue)}`;
       case 'updated':
-        return `Property '${key}' was ${state}. From ${defineValue(oldValue)} to ${defineValue(newValue)}`;
+        return `Property '${propertyName}' was ${changeType}. From ${formatValue(previousValue)} to ${formatValue(updatedValue)}`;
       case 'unchanged':
         return [];
       case 'removed':
-        return `Property '${key}' was ${state}`;
+        return `Property '${propertyName}' was ${changeType}`;
       case 'nested':
-        return value.flatMap((el) => {
-          const newKey = `${key}.${el.key}`;
-          const newEl = { ...el, key: newKey };
-          return innerFunc(newEl);
+        return newValue.flatMap((el) => {
+          const nestedKey = `${propertyName}.${el.key}`;
+          const updatedEl = { ...el, key: nestedKey };
+          return processNode(updatedEl);
         });
       default:
-        throw new Error(`Invalid node state - ${state}`);
+        throw new Error(`Invalid node state - ${changeType}`);
     }
   };
-  return tree.flatMap(innerFunc).join('\n');
+  return diffTree.flatMap(processNode).join('\n');
 };
 
 export default plain;
