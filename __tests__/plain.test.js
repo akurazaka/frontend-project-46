@@ -10,7 +10,7 @@ describe('plain formatter', () => {
       },
     ];
     const result = plain(diffTree);
-    expect(result).toBe("Property 'host' was added with value: 'hexlet.io'");
+    expect(result).toBe('Property \'host\' was added with value: \'hexlet.io\'');
   });
 
   test('should format updated property', () => {
@@ -23,7 +23,7 @@ describe('plain formatter', () => {
       },
     ];
     const result = plain(diffTree);
-    expect(result).toBe("Property 'timeout' was updated. From 50 to 20");
+    expect(result).toBe('Property \'timeout\' was updated. From 50 to 20');
   });
 
   test('should format removed property', () => {
@@ -34,7 +34,7 @@ describe('plain formatter', () => {
       },
     ];
     const result = plain(diffTree);
-    expect(result).toBe("Property 'timeout' was removed");
+    expect(result).toBe('Property \'timeout\' was removed');
   });
 
   test('should handle nested properties', () => {
@@ -57,7 +57,7 @@ describe('plain formatter', () => {
     ];
     const result = plain(diffTree);
     expect(result).toBe(
-      "Property 'common.setting1' was removed\nProperty 'common.setting2' was added with value: 'value2'"
+      'Property \'common.setting1\' was removed\nProperty \'common.setting2\' was added with value: \'value2\'',
     );
   });
 
@@ -82,6 +82,6 @@ describe('plain formatter', () => {
     ];
     expect(() => {
       plain(diffTree);
-    }).toThrowError('Invalid node state - invalidState');
+    }).toThrow('Invalid node state - invalidState');
   });
 });
