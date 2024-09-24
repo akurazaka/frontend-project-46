@@ -42,7 +42,7 @@ describe('buildDifferenceTree', () => {
         key: 'key1',
         state: 'nested',
         value: [
-          { 
+          {
             key: 'nestedKey', state: 'updated', oldValue: 'value1', newValue: 'value2',
           },
         ],
