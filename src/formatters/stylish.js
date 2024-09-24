@@ -31,10 +31,10 @@ const stylish = (diffTree) => {
     const space = ' ';
     const closingBracketIndent = currentIndent + offset;
     const {
-      key: propertyName, 
-      state: changeType, 
-      value: newValue, 
-      oldValue: previousValue, 
+      key: propertyName,
+      state: changeType,
+      value: newValue,
+      oldValue: previousValue,
       newValue: updatedValue,
     } = diffNode;
 

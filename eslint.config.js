@@ -8,6 +8,7 @@ export default [
       'no-unused-vars': 'warn',
       'no-undef': 'warn',
       quotes: ['error', 'single'],
+      'no-trailing-spaces': ['error', { 'skipBlankLines': false, 'ignoreComments': false }],
     },
   },
 ];
