@@ -1,10 +1,12 @@
 import _ from 'lodash';
 
-const formatValue = (data, level) => {
+// Функция для получения отступов
+const getIndent = (level, offset = 0) => {
   const indentLevel = 4;
-  const currentIndent = level * indentLevel + indentLevel;
-  const closingBracketIndent = currentIndent - indentLevel;
-  const space = ' ';
+  return ' '.repeat(level * indentLevel + offset);
+};
+
+const formatValue = (data, level) => {
 
   if (!_.isObject(data)) {
     return data;
@@ -12,18 +14,13 @@ const formatValue = (data, level) => {
 
   const entries = Object.entries(data);
   const formattedEntries = entries.map(
-    ([key, val]) => `${space.repeat(currentIndent)}${key}: ${formatValue(val, level + 1)}`,
+    ([key, val]) => `${getIndent(level)}${key}: ${formatValue(val, level + 1)}`,
   );
-  return ['{', ...formattedEntries, `${space.repeat(closingBracketIndent)}}`].join('\n');
+  return ['{', ...formattedEntries, `${getIndent(level, -indentLevel)}}`].join('\n');
 };
 
 const stylish = (diffTree) => {
   const processNode = (diffNode, level) => {
-    const indentLevel = 4;
-    const offset = 2;
-    const currentIndent = level * indentLevel - offset;
-    const space = ' ';
-    const closingBracketIndent = currentIndent + offset;
     const {
       key: propertyName,
       type: changeType,
@@ -34,19 +31,19 @@ const stylish = (diffTree) => {
 
     switch (changeType) {
       case 'added':
-        return `${space.repeat(currentIndent)}+ ${propertyName}: ${formatValue(newValue, level)}`;
+        return `${getIndent(level)}+ ${propertyName}: ${formatValue(newValue, level)}`;
 
       case 'removed':
-        return `${space.repeat(currentIndent)}- ${propertyName}: ${formatValue(newValue, level)}`;
+        return `${getIndent(level)}- ${propertyName}: ${formatValue(newValue, level)}`;
 
       case 'unchanged':
-        return `${space.repeat(currentIndent)}  ${propertyName}: ${formatValue(newValue, level)}`;
+        return `${getIndent(level)}  ${propertyName}: ${formatValue(newValue, level)}`;
 
       case 'updated':
-        return `${space.repeat(currentIndent)}- ${propertyName}: ${formatValue(previousValue, level)}\n${space.repeat(currentIndent)}+ ${propertyName}: ${formatValue(updatedValue, level)}`;
+        return `${getIndent(level)}- ${propertyName}: ${formatValue(previousValue, level)}\n${getIndent(level)}+ ${propertyName}: ${formatValue(updatedValue, level)}`;
 
       case 'nested':
-        return `${space.repeat(currentIndent)}  ${propertyName}: {\n${diffNode.value.map((childNode) => processNode(childNode, level + 1)).join('\n')}\n${space.repeat(closingBracketIndent)}}`;
+        return `${getIndent(level)}  ${propertyName}: {\n${diffNode.value.map((childNode) => processNode(childNode, level + 1)).join('\n')}\n${getIndent(level, -2)}}`;
 
       default:
         throw new Error(`Invalid node type - ${changeType}`);
