@@ -5,7 +5,7 @@ describe('plain formatter', () => {
     const diffTree = [
       {
         key: 'host',
-        state: 'added',
+        type: 'added',
         value: 'hexlet.io',
       },
     ];
@@ -17,9 +17,9 @@ describe('plain formatter', () => {
     const diffTree = [
       {
         key: 'timeout',
-        state: 'updated',
-        oldValue: 50,
-        newValue: 20,
+        type: 'updated',
+        value1: 50,
+        value2: 20,
       },
     ];
     const result = plain(diffTree);
@@ -30,7 +30,7 @@ describe('plain formatter', () => {
     const diffTree = [
       {
         key: 'timeout',
-        state: 'removed',
+        type: 'removed',
       },
     ];
     const result = plain(diffTree);
@@ -41,15 +41,15 @@ describe('plain formatter', () => {
     const diffTree = [
       {
         key: 'common',
-        state: 'nested',
+        type: 'nested',
         value: [
           {
             key: 'setting1',
-            state: 'removed',
+            type: 'removed',
           },
           {
             key: 'setting2',
-            state: 'added',
+            type: 'added',
             value: 'value2',
           },
         ],
@@ -65,7 +65,7 @@ describe('plain formatter', () => {
     const diffTree = [
       {
         key: 'verbose',
-        state: 'unchanged',
+        type: 'unchanged',
         value: true,
       },
     ];
@@ -73,15 +73,15 @@ describe('plain formatter', () => {
     expect(result).toBe('');
   });
 
-  test('should throw error for invalid state', () => {
+  test('should throw error for invalid type', () => {
     const diffTree = [
       {
         key: 'invalid',
-        state: 'invalidState',
+        type: 'invalidType',
       },
     ];
     expect(() => {
       plain(diffTree);
-    }).toThrow('Invalid node state - invalidState');
+    }).toThrow('Invalid node type - invalidType');
   });
 });

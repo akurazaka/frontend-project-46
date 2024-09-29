@@ -13,14 +13,18 @@ const formatValue = (data) => {
 const plain = (diffTree) => {
   const processNode = (diffNode) => {
     const {
-      key: propertyName,
-      state: changeType,
+      key: propertyName = '',
+      type: changeType = '',
       value: newValue,
-      oldValue: previousValue,
-      newValue: updatedValue,
-    } = diffNode;
+      value1: previousValue,
+      value2: updatedValue,
+    } = diffNode || {};
 
-    switch (diffNode.state) {
+    if (!propertyName || !changeType) {
+      throw new Error('Invalid node structure - missing key or type');
+    }
+
+    switch (changeType) {
       case 'added':
         return `Property '${propertyName}' was ${changeType} with value: ${formatValue(newValue)}`;
       case 'updated':
@@ -30,15 +34,23 @@ const plain = (diffTree) => {
       case 'removed':
         return `Property '${propertyName}' was ${changeType}`;
       case 'nested':
+        if (!Array.isArray(newValue)) {
+          throw new Error(`Expected an array for nested property '${propertyName}', but got ${typeof newValue}`);
+        }
         return newValue.flatMap((el) => {
           const nestedKey = `${propertyName}.${el.key}`;
           const updatedEl = { ...el, key: nestedKey };
           return processNode(updatedEl);
         });
       default:
-        throw new Error(`Invalid node state - ${changeType}`);
+        throw new Error(`Invalid node type - ${changeType}`);
     }
   };
+
+  if (!Array.isArray(diffTree)) {
+    throw new Error('Invalid diffTree structure, expected an array');
+  }
+
   return diffTree.flatMap(processNode).join('\n');
 };
 
