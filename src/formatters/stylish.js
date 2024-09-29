@@ -35,8 +35,8 @@ const stylish = (diffTree) => {
     const closingBracketIndent = currentIndent + offset;
 
     const {
-      key: propertyName = '',
-      type: changeType = '',
+      key: propertyName,
+      type: changeType,
       value: newValue,
       value1: previousValue,
       value2: updatedValue,
