@@ -13,8 +13,8 @@ const formatValue = (data) => {
 const plain = (diffTree) => {
   const processNode = (diffNode) => {
     const {
-      key: propertyName = '',
-      type: changeType = '',
+      key: propertyName,
+      type: changeType,
       value: newValue,
       value1: previousValue,
       value2: updatedValue,

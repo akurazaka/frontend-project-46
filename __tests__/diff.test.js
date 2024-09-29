@@ -1,89 +1,25 @@
-import buildDifferenceTree from '../src/buildDifferenceTree';
+import { test, expect } from '@jest/globals';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+import generateDiff from '../src/index.js';
 
-describe('buildDifferenceTree', () => {
-  test('должен корректно обрабатывать добавленные и удаленные ключи', () => {
-    const data1 = { key1: 'value1', key2: 'value2' };
-    const data2 = { key2: 'value2', key3: 'value3' };
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-    const result = buildDifferenceTree(data1, data2);
+const getFixturePath = (filename) => path.join(__dirname, '..', '__fixtures__', filename);
+const readFile = (filename) => fs.readFileSync(getFixturePath(filename), 'utf-8');
 
-    const expected = [
-      { key: 'key1', type: 'removed', value: 'value1' },
-      { key: 'key2', type: 'unchanged', value: 'value2' },
-      { key: 'key3', type: 'added', value: 'value3' },
-    ];
+const extentions = ['json', 'yml'];
 
-    expect(result).toEqual(expected);
-  });
+test.each(extentions)('check formatters', (extention) => {
+  const filePath1 = getFixturePath('file1.json');
+  const filePath2 = getFixturePath('file2.json');
+  const expectedStylish = readFile('expectedStylish.txt');
+  const expectedPlain = readFile('expectedPlain.txt');
+  const expectedJSON = readFile('expectedJson.json');
 
-  test('должен корректно обрабатывать обновленные значения', () => {
-    const data1 = { key1: 'value1' };
-    const data2 = { key1: 'newValue1' };
-
-    const result = buildDifferenceTree(data1, data2);
-
-    const expected = [
-      {
-        key: 'key1', type: 'updated', value1: 'value1', value2: 'newValue1',
-      },
-    ];
-
-    expect(result).toEqual(expected);
-  });
-
-  test('должен корректно обрабатывать вложенные объекты', () => {
-    const data1 = { key1: { nestedKey: 'value1' } };
-    const data2 = { key1: { nestedKey: 'value2' } };
-
-    const result = buildDifferenceTree(data1, data2);
-
-    const expected = [
-      {
-        key: 'key1',
-        type: 'nested',
-        value: [
-          {
-            key: 'nestedKey', type: 'updated', value1: 'value1', value2: 'value2',
-          },
-        ],
-      },
-    ];
-
-    expect(result).toEqual(expected);
-  });
-
-  test('должен корректно обрабатывать неизменённые значения', () => {
-    const data1 = { key1: 'value1' };
-    const data2 = { key1: 'value1' };
-
-    const result = buildDifferenceTree(data1, data2);
-
-    const expected = [
-      { key: 'key1', type: 'unchanged', value: 'value1' },
-    ];
-
-    expect(result).toEqual(expected);
-  });
-
-  test('должен корректно обрабатывать пустые объекты', () => {
-    const data1 = {};
-    const data2 = {};
-
-    const result = buildDifferenceTree(data1, data2);
-
-    expect(result).toEqual([]);
-  });
-
-  test('должен корректно обрабатывать ситуации, когда один из объектов пуст', () => {
-    const data1 = { key1: 'value1' };
-    const data2 = {};
-
-    const result = buildDifferenceTree(data1, data2);
-
-    const expected = [
-      { key: 'key1', type: 'removed', value: 'value1' },
-    ];
-
-    expect(result).toEqual(expected);
-  });
+  expect(generateDiff(filePath1, filePath2)).toEqual(expectedStylish);
+  expect(generateDiff(filePath1, filePath2, 'plain')).toEqual(expectedPlain);
+  expect(generateDiff(filePath1, filePath2, 'json')).toEqual(expectedJSON);
 });

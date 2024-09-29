@@ -8,7 +8,7 @@ const getFormat = (tree, formatter) => {
     case 'plain':
       return plain(tree);
     case 'json':
-      return JSON.stringify(tree, null, 2);
+      return JSON.stringify(tree, null, 4);
     default:
       throw new Error(`Unknown formatter: ${formatter}`);
   }
