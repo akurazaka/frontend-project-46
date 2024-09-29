@@ -10,9 +10,7 @@ const __dirname = path.dirname(__filename);
 const getFixturePath = (filename) => path.join(__dirname, '..', '__fixtures__', filename);
 const readFile = (filename) => fs.readFileSync(getFixturePath(filename), 'utf-8');
 
-const extentions = ['json', 'yml'];
-
-test.each(extentions)('check formatters', (extention) => {
+test('testing', () => {
   const filePath1 = getFixturePath('file1.json');
   const filePath2 = getFixturePath('file2.json');
   const expectedStylish = readFile('expectedStylish.txt');
