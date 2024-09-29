@@ -20,7 +20,7 @@ const formatValue = (data, level) => {
 
   const entries = Object.entries(data);
   const formattedEntries = entries.map(
-    ([key, val]) => `${space.repeat(currentIndent)}${key}: ${formatValue(val, level + 1)}`
+    ([key, val]) => `${space.repeat(currentIndent)}${key}: ${formatValue(val, level + 1)}`,
   );
 
   return ['{', ...formattedEntries, `${space.repeat(closingBracketIndent)}}`].join('\n');
@@ -51,11 +51,11 @@ const stylish = (diffTree) => {
       case 'removed':
       case 'unchanged':
         return `${space.repeat(currentIndent)}${changeTypes[changeType]}${propertyName}: ${formatValue(newValue, level)}`;
-      
+
       case 'updated':
         return `${space.repeat(currentIndent)}${changeTypes[changeType][0]}${propertyName}: ${formatValue(previousValue, level)}\n` +
                `${space.repeat(currentIndent)}${changeTypes[changeType][1]}${propertyName}: ${formatValue(updatedValue, level)}`;
-      
+
       case 'nested':
         if (!Array.isArray(newValue)) {
           throw new Error(`Expected an array for nested property '${propertyName}', but got ${typeof newValue}`);
