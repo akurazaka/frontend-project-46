@@ -23,29 +23,33 @@ const stylish = (diffTree) => {
     const currentIndent = getIndent(level, 2);
     const closingBracketIndent = getIndent(level);
 
-    const {
-      key: propertyName,
-      type: changeType,
-      value: newValue,
-      value1: previousValue,
-      value2: updatedValue,
-    } = diffNode;
+    const { key: propertyName, type: changeType } = diffNode;
 
     switch (changeType) {
-      case 'added':
-        return `${currentIndent}+ ${propertyName}: ${formatValue(newValue, level)}`;
+      case 'added': {
+        const { value } = diffNode;
+        return `${currentIndent}+ ${propertyName}: ${formatValue(value, level)}`;
+      }
 
-      case 'removed':
-        return `${currentIndent}- ${propertyName}: ${formatValue(newValue, level)}`;
+      case 'removed': {
+        const { value } = diffNode;
+        return `${currentIndent}- ${propertyName}: ${formatValue(value, level)}`;
+      }
 
-      case 'unchanged':
-        return `${currentIndent}  ${propertyName}: ${formatValue(newValue, level)}`;
+      case 'unchanged': {
+        const { value } = diffNode;
+        return `${currentIndent}  ${propertyName}: ${formatValue(value, level)}`;
+      }
 
-      case 'updated':
-        return `${currentIndent}- ${propertyName}: ${formatValue(previousValue, level)}\n${currentIndent}+ ${propertyName}: ${formatValue(updatedValue, level)}`;
+      case 'updated': {
+        const { value1, value2 } = diffNode;
+        return `${currentIndent}- ${propertyName}: ${formatValue(value1, level)}\n${currentIndent}+ ${propertyName}: ${formatValue(value2, level)}`;
+      }
 
-      case 'nested':
-        return `${currentIndent}  ${propertyName}: {\n${diffNode.value.map((childNode) => processNode(childNode, level + 1)).join('\n')}\n${closingBracketIndent}}`;
+      case 'nested': {
+        const { value } = diffNode;
+        return `${currentIndent}  ${propertyName}: {\n${value.map((childNode) => processNode(childNode, level + 1)).join('\n')}\n${closingBracketIndent}}`;
+      }
 
       default:
         throw new Error(`Invalid node type - ${changeType}`);
